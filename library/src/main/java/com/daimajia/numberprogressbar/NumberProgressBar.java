@@ -2,9 +2,13 @@ package com.daimajia.numberprogressbar;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -155,6 +159,8 @@ public class NumberProgressBar extends View {
      */
     private OnProgressBarListener mListener;
 
+    private Bitmap mTextBackgroundBitmap;
+
     public enum ProgressTextVisibility {
         Visible, Invisible
     }
@@ -169,7 +175,7 @@ public class NumberProgressBar extends View {
 
     public NumberProgressBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
+        mTextBackgroundBitmap = BitmapFactory.decodeResource(context.getResources(),R.drawable.jin);
         default_reached_bar_height = dp2px(1.5f);
         default_unreached_bar_height = dp2px(1.0f);
         default_text_size = sp2px(10);
@@ -252,8 +258,13 @@ public class NumberProgressBar extends View {
             canvas.drawRect(mUnreachedRectF, mUnreachedBarPaint);
         }
 
-        if (mIfDrawText)
-            canvas.drawText(mCurrentDrawText, mDrawTextStart, mDrawTextEnd, mTextPaint);
+        if (mIfDrawText) {
+
+            mTextPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
+//            canvas.drawBitmap(mTextBackgroundBitmap, mDrawTextStart -50, mDrawTextEnd - 50, mTextPaint);
+            canvas.drawText(mCurrentDrawText, mDrawTextStart-30, mDrawTextEnd - 26, mTextPaint);
+
+        }
     }
 
     private void initializePainters() {
@@ -294,16 +305,17 @@ public class NumberProgressBar extends View {
             mDrawReachedBar = true;
             mReachedRectF.left = getPaddingLeft();
             mReachedRectF.top = getHeight() / 2.0f - mReachedBarHeight / 2.0f;
-            mReachedRectF.right = (getWidth() - getPaddingLeft() - getPaddingRight()) / (getMax() * 1.0f) * getProgress() - mOffset + getPaddingLeft();
+            mReachedRectF.right = (getWidth() - getPaddingLeft() - getPaddingRight()) / (getMax() * 1.0f) * getProgress()  + getPaddingLeft();
             mReachedRectF.bottom = getHeight() / 2.0f + mReachedBarHeight / 2.0f;
-            mDrawTextStart = (mReachedRectF.right + mOffset);
+            mDrawTextStart = (mReachedRectF.right );
         }
 
         mDrawTextEnd = (int) ((getHeight() / 2.0f) - ((mTextPaint.descent() + mTextPaint.ascent()) / 2.0f));
 
         if ((mDrawTextStart + mDrawTextWidth) >= getWidth() - getPaddingRight()) {
             mDrawTextStart = getWidth() - getPaddingRight() - mDrawTextWidth;
-            mReachedRectF.right = mDrawTextStart - mOffset;
+//            mReachedRectF.right = mDrawTextStart - mOffset;
+            mReachedRectF.right = mDrawTextStart;
         }
 
         float unreachedBarStart = mDrawTextStart + mDrawTextWidth + mOffset;
@@ -311,7 +323,7 @@ public class NumberProgressBar extends View {
             mDrawUnreachedBar = false;
         } else {
             mDrawUnreachedBar = true;
-            mUnreachedRectF.left = unreachedBarStart;
+            mUnreachedRectF.left = mReachedRectF.right;
             mUnreachedRectF.right = getWidth() - getPaddingRight();
             mUnreachedRectF.top = getHeight() / 2.0f + -mUnreachedBarHeight / 2.0f;
             mUnreachedRectF.bottom = getHeight() / 2.0f + mUnreachedBarHeight / 2.0f;
