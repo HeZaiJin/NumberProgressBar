@@ -36,7 +36,7 @@ public class MainActivity extends ActionBarActivity implements OnProgressBarList
                     }
                 });
             }
-        }, 1000, 100);
+        }, 500, 50);
     }
 
     @Override
